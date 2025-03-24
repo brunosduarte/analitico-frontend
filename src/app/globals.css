@@ -119,3 +119,47 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* Estilos personalizados para componentes específicos */
+.extrato-card {
+  transition: transform 0.2s ease;
+}
+
+.extrato-card:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-card {
+  min-height: 180px;
+}
+
+.tomador-badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+/* Cores específicas para categorias */
+.categoria-estivador {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300;
+}
+
+.categoria-arrumador {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300;
+}
+
+.categoria-vigia {
+  @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300;
+}
+
+.categoria-conferente {
+  @apply bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300;
+}
+
+/* Cores para gráficos */
+.chart-colors {
+  --color-1: hsl(214, 60%, 60%);
+  --color-2: hsl(162, 48%, 50%);
+  --color-3: hsl(291, 48%, 60%);
+  --color-4: hsl(45, 70%, 50%);
+  --color-5: hsl(0, 65%, 60%);
+}
