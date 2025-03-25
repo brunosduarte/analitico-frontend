@@ -11,8 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { UserMenu } from "@/components/auth/user-menu"; // Importar o componente UserMenu
 
 interface NavItem {
   href: string;
@@ -22,7 +22,6 @@ interface NavItem {
 
 export function Header() {
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const navItems: NavItem[] = [
     {
@@ -72,7 +71,10 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <ModeToggle />
+          <div className="flex items-center space-x-4">
+            <ModeToggle />
+            <UserMenu /> {/* Adicionar o UserMenu */}
+          </div>
         </nav>
 
         {/* Menu móvel */}
@@ -94,6 +96,11 @@ export function Header() {
                   </Link>
                 </DropdownMenuItem>
               ))}
+              <DropdownMenuItem className="md:hidden block">
+                <div className="w-full">
+                  <UserMenu /> {/* Adicionar o UserMenu no menu móvel */}
+                </div>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
