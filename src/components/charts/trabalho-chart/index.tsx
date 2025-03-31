@@ -9,36 +9,44 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
 } from 'recharts'
 import { DataCard } from '@/components/common/data-card'
 import { useMemo } from 'react'
+import { CHART_THEMES } from '@/lib/constants'
+
+// Definição de tipos para os dados do gráfico
+type TooltipData = {
+  active?: boolean
+  payload?: Array<{
+    name: string
+    value: number
+    payload?: Record<string, unknown>
+  }>
+}
 
 interface TrabalhoChartProps {
   trabalhos: Trabalho[]
   title?: string
   description?: string
   className?: string
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
- * Componente TrabalhoChart: Exibe gráficos de distribuição de trabalhos
+ * Componente TrabalhoChart: Exibe gráfico de distribuição de trabalhos por tomador
  * Reutilizável em diferentes partes da aplicação
  */
 export function TrabalhoChart({
   trabalhos,
   title = 'Distribuição de Trabalhos',
-  description = 'Visualização de trabalhos por tomador e por dia',
+  description = 'Visualização de trabalhos por tomador',
   className,
+  chartTheme = 'classic',
 }: TrabalhoChartProps) {
   // Agrupar trabalhos por tomador
   const tomadoresData = useMemo(() => {
-    const grouped = trabalhos.reduce(
-      (acc: Record<string, number>, trabalho) => {
+    const grouped = trabalhos.reduce<Record<string, number>>(
+      (acc, trabalho) => {
         if (!acc[trabalho.tomador]) {
           acc[trabalho.tomador] = 0
         }
@@ -60,57 +68,18 @@ export function TrabalhoChart({
     return pieData
   }, [trabalhos])
 
-  // Agrupar trabalhos por dia para o gráfico de barras
-  const diasData = useMemo(() => {
-    const grouped = trabalhos.reduce(
-      (acc: Record<string, number>, trabalho) => {
-        if (!acc[trabalho.dia]) {
-          acc[trabalho.dia] = 0
-        }
-        acc[trabalho.dia] += trabalho.liquido
-        return acc
-      },
-      {},
-    )
-
-    // Converter para array para o gráfico
-    const barData = Object.entries(grouped)
-      .map(([dia, valor]) => ({
-        dia,
-        valor,
-      }))
-      .sort((a, b) => parseInt(a.dia) - parseInt(b.dia))
-
-    return barData
-  }, [trabalhos])
-
   // Gerar cores para o gráfico
   const COLORS = useMemo(
-    () => generateChartColors(tomadoresData.length),
-    [tomadoresData.length],
+    () => generateChartColors(tomadoresData.length, chartTheme),
+    [tomadoresData.length, chartTheme],
   )
 
   // Componente para tooltip personalizado do gráfico de pizza
-  const PieTooltip = ({ active, payload }: any) => {
+  const PieTooltip = ({ active, payload }: TooltipData) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background border rounded-md shadow-md p-3">
           <p className="font-medium">Tomador: {payload[0].name}</p>
-          <p className="text-sm text-muted-foreground">
-            {formatCurrency(payload[0].value)}
-          </p>
-        </div>
-      )
-    }
-    return null
-  }
-
-  // Componente para tooltip personalizado do gráfico de barras
-  const BarTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-background border rounded-md shadow-md p-3">
-          <p className="font-medium">Dia: {label}</p>
           <p className="text-sm text-muted-foreground">
             {formatCurrency(payload[0].value)}
           </p>
@@ -134,60 +103,32 @@ export function TrabalhoChart({
 
   return (
     <DataCard title={title} description={description} className={className}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-        <div>
-          <h3 className="font-medium mb-2 text-center">
-            Distribuição por Tomador
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={tomadoresData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) =>
-                  `${name} (${(percent * 100).toFixed(0)}%)`
-                }
-              >
-                {tomadoresData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={<PieTooltip />} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div>
-          <h3 className="font-medium mb-2 text-center">Rendimentos por Dia</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={diasData}
-              margin={{
-                top: 5,
-                right: 10,
-                left: 10,
-                bottom: 5,
-              }}
+      <div className="h-80">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={tomadoresData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              outerRadius={120}
+              fill="#8884d8"
+              dataKey="value"
+              label={({ name, percent }) =>
+                `${name} (${(percent * 100).toFixed(0)}%)`
+              }
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="dia" />
-              <YAxis
-                tickFormatter={(value) => formatCurrency(value).split(',')[0]}
-              />
-              <Tooltip content={<BarTooltip />} />
-              <Bar dataKey="valor" fill="var(--color-1)" name="Valor" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+              {tomadoresData.map((_, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
+              ))}
+            </Pie>
+            <Tooltip content={PieTooltip} />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
     </DataCard>
   )

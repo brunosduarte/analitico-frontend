@@ -3,12 +3,13 @@
 import { WeeklyJobData } from '@/types'
 import { BarChart } from '@/components/charts'
 import { useMemo } from 'react'
-import { CHART_COLORS, MESES_NOME } from '@/lib/constants'
+import { CHART_THEMES, MESES_NOME } from '@/lib/constants'
 import { formatNumber } from '@/lib/utils'
 
 interface WeeklyDistributionProps {
   data: WeeklyJobData[]
   isLoading?: boolean
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
@@ -18,10 +19,14 @@ interface WeeklyDistributionProps {
 export function WeeklyDistribution({
   data,
   isLoading = false,
+  chartTheme = 'classic',
 }: WeeklyDistributionProps) {
   // Preparar séries para o gráfico a partir das chaves disponíveis
   const { barSeries, formattedData } = useMemo(() => {
     if (!data || data.length === 0) return { barSeries: [], formattedData: [] }
+
+    // Obter as cores do tema
+    const colors = CHART_THEMES[chartTheme] || CHART_THEMES.classic
 
     // Pegar todas as chaves menos 'week'
     const sampleItem = data[0]
@@ -36,7 +41,7 @@ export function WeeklyDistribution({
       return {
         key,
         name: `${mesNome}/${ano}`,
-        color: CHART_COLORS[index % CHART_COLORS.length],
+        color: colors[index % colors.length],
       }
     })
 
@@ -58,7 +63,7 @@ export function WeeklyDistribution({
     })
 
     return { barSeries, formattedData }
-  }, [data])
+  }, [data, chartTheme])
 
   // Tooltip personalizado para o gráfico de barras
   const WeeklyTooltip = ({ active, payload, label }: any) => {
@@ -90,6 +95,8 @@ export function WeeklyDistribution({
       tooltipContent={<WeeklyTooltip />}
       height={320}
       series={barSeries}
+      colors={CHART_THEMES[chartTheme]}
+      chartTheme={chartTheme}
     />
   )
 }

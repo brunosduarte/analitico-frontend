@@ -3,10 +3,12 @@
 import { SalaryBreakdownItem } from '@/types'
 import { PieChart } from '@/components/charts'
 import { PieTooltip } from '@/components/charts/utils/tooltips'
+import { CHART_THEMES } from '@/lib/constants'
 
 interface SalaryBreakdownProps {
   data: SalaryBreakdownItem[]
   isLoading?: boolean
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
@@ -15,6 +17,7 @@ interface SalaryBreakdownProps {
 export function SalaryBreakdown({
   data,
   isLoading = false,
+  chartTheme = 'classic',
 }: SalaryBreakdownProps) {
   // Calcula o total para percentuais
   const total = data.reduce((sum, item) => sum + item.value, 0)
@@ -34,6 +37,8 @@ export function SalaryBreakdown({
       emptyMessage="Não há dados suficientes para exibir a distribuição salarial"
       tooltipContent={<PieTooltip />}
       height={320}
+      colors={CHART_THEMES[chartTheme]}
+      chartTheme={chartTheme}
     />
   )
 }

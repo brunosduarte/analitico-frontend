@@ -1,6 +1,11 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { CATEGORIAS_CORES, CHART_COLORS, MESES_NOME } from './constants'
+import {
+  CATEGORIAS_CORES,
+  CHART_COLORS,
+  CHART_THEMES,
+  MESES_NOME,
+} from './constants'
 
 /**
  * Função para combinar classes do Tailwind
@@ -59,15 +64,20 @@ export function getMonthName(monthAbbr: string) {
 /**
  * Função para gerar cores para gráficos
  */
-export function generateChartColors(count: number) {
-  if (count <= CHART_COLORS.length) {
-    return CHART_COLORS.slice(0, count)
+export function generateChartColors(
+  count: number,
+  theme: keyof typeof CHART_THEMES = 'classic',
+) {
+  const themeColors = CHART_THEMES[theme] || CHART_THEMES.classic
+
+  if (count <= themeColors.length) {
+    return themeColors.slice(0, count)
   }
 
   // Se precisarmos de mais cores, gerar cores adicionais
-  const colors = [...CHART_COLORS]
+  const colors = [...themeColors]
 
-  for (let i = CHART_COLORS.length; i < count; i++) {
+  for (let i = themeColors.length; i < count; i++) {
     const hue = (i * 137) % 360 // Distribuição uniforme de cores
     colors.push(`hsl(${hue}, 55%, 55%)`)
   }

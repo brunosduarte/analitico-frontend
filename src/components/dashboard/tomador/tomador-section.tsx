@@ -4,19 +4,23 @@ import { TomadorCardData } from '@/types'
 import { DataCard } from '@/components/common/data-card'
 import { TomadorList } from '@/components/dashboard/tomador/tomador-card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CHART_THEMES } from '@/lib/constants'
 
 interface DashboardTomadorSectionProps {
   tomadoresData: TomadorCardData[]
   trabalhos: any[] // Utilizamos any aqui pois são trabalhos com campos adicionais
+  isLoading?: boolean
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
  * Componente DashboardTomadorSection: Seção de tomadores do dashboard
- * Nota: Os gráficos de turnos, valor bruto por faina e top fainas foram movidos para a aba "Visão Geral"
  */
 export function DashboardTomadorSection({
   tomadoresData,
   trabalhos,
+  isLoading = false,
+  chartTheme = 'classic',
 }: DashboardTomadorSectionProps) {
   if (tomadoresData.length === 0 || trabalhos.length === 0) {
     return (

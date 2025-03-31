@@ -15,26 +15,26 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts'
-import { CHART_COLORS } from '@/lib/constants'
+import { CHART_THEMES } from '@/lib/constants'
 
 type SeriesType = 'bar' | 'line' | 'area'
 
 // Tipo genérico para dados de gráfico
 type ChartDataItem = {
   name: string
-  [key: string]: string | number | undefined
+  [key: string]: unknown
 }
 
-// Tipagem melhorada para formatters
-type AxisFormatter = (value: string | number) => string
-type YAxisFormatterWithProps = (
-  value: string | number,
-  props?: { yAxisId?: string },
-) => string
-
-// Valor aceitável para TooltipProps
+// Definição de tipos específicos para valores de gráficos
 type ValueType = string | number | Array<string | number>
 type NameType = string | number
+
+// Tipagem melhorada para formatters
+type AxisFormatter = (value: ValueType) => string
+type YAxisFormatterWithProps = (
+  value: ValueType,
+  props?: { yAxisId?: string },
+) => string
 
 interface ComposableChartProps {
   data: ChartDataItem[]
@@ -58,6 +58,7 @@ interface ComposableChartProps {
   }>
   multipleYAxis?: boolean
   showGrid?: boolean
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 // Tipos específicos para os props de cada componente de gráfico
@@ -99,7 +100,7 @@ export function ComposableChart({
   emptyMessage = 'Não há dados suficientes para exibir o gráfico',
   height = 300,
   tooltipContent,
-  colors = CHART_COLORS,
+  colors,
   nameKey = 'name',
   xAxisFormatter,
   yAxisFormatter,
@@ -107,7 +108,11 @@ export function ComposableChart({
   series,
   multipleYAxis = false,
   showGrid = true,
+  chartTheme = 'classic',
 }: ComposableChartProps) {
+  // Use provided colors or get them from the theme
+  const chartColors = colors || CHART_THEMES[chartTheme] || CHART_THEMES.classic
+
   if (isLoading) {
     return (
       <DataCard title={title} description={description} className={className}>
@@ -138,9 +143,9 @@ export function ComposableChart({
     multipleYAxis && series.some((s) => s.yAxisId === 'right')
 
   // Criar uma função de formatação que lida com os props extras
-  const formatYAxis = (value: string | number) => {
+  const formatYAxis = (value: ValueType, props?: { yAxisId?: string }) => {
     if (yAxisFormatter) {
-      return yAxisFormatter(value)
+      return yAxisFormatter(value, props)
     }
     return String(value)
   }
@@ -159,14 +164,18 @@ export function ComposableChart({
               <YAxis
                 yAxisId="left"
                 orientation="left"
-                tickFormatter={formatYAxis}
+                tickFormatter={(value) =>
+                  formatYAxis(value, { yAxisId: 'left' })
+                }
               />
             )}
             {hasRightAxis && (
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                tickFormatter={formatYAxis}
+                tickFormatter={(value) =>
+                  formatYAxis(value, { yAxisId: 'right' })
+                }
               />
             )}
             {tooltipContent ? (
@@ -178,7 +187,7 @@ export function ComposableChart({
 
             {series.map((s, index) => {
               // Configurar props comuns para todos os tipos de gráficos
-              const color = s.color || colors[index % colors.length]
+              const color = s.color || chartColors[index % chartColors.length]
               const yAxisId = multipleYAxis ? s.yAxisId || 'left' : undefined
 
               switch (s.type) {

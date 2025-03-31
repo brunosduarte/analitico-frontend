@@ -13,25 +13,29 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts'
-import { CHART_COLORS } from '@/lib/constants'
+import { CHART_THEMES } from '@/lib/constants'
+
+// Definição de tipos específicos para valores de gráficos
+type ValueType = string | number | Array<string | number>
+type NameType = string | number
 
 interface BarChartProps {
   data: Array<{
     name: string
     value?: number
-    [key: string]: any
+    [key: string]: unknown
   }>
   title: string
   description?: string
   isLoading?: boolean
   emptyMessage?: string
   height?: number
-  tooltipContent?: React.ReactElement<TooltipProps<any, any>>
+  tooltipContent?: React.ReactElement<TooltipProps<ValueType, NameType>>
   colors?: string[]
   dataKey?: string
   nameKey?: string
-  xAxisFormatter?: (value: any) => string
-  yAxisFormatter?: (value: any) => string
+  xAxisFormatter?: (value: ValueType) => string
+  yAxisFormatter?: (value: ValueType) => string
   className?: string
   series?: Array<{
     key: string
@@ -40,6 +44,7 @@ interface BarChartProps {
   }>
   layout?: 'vertical' | 'horizontal'
   showGrid?: boolean
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
@@ -53,7 +58,7 @@ export function BarChart({
   emptyMessage = 'Não há dados suficientes para exibir o gráfico',
   height = 300,
   tooltipContent,
-  colors = CHART_COLORS,
+  colors,
   dataKey = 'value',
   nameKey = 'name',
   xAxisFormatter,
@@ -62,7 +67,11 @@ export function BarChart({
   series,
   layout = 'horizontal',
   showGrid = true,
+  chartTheme = 'classic',
 }: BarChartProps) {
+  // Use provided colors or get them from the theme
+  const chartColors = colors || CHART_THEMES[chartTheme] || CHART_THEMES.classic
+
   if (isLoading) {
     return (
       <DataCard title={title} description={description} className={className}>
@@ -131,12 +140,12 @@ export function BarChart({
                   key={`bar-${s.key}`}
                   dataKey={s.key}
                   name={s.name}
-                  fill={s.color || colors[index % colors.length]}
+                  fill={s.color || chartColors[index % chartColors.length]}
                 />
               ))
             ) : (
               // Renderizar uma única série usando dataKey
-              <Bar dataKey={dataKey} name="Valor" fill={colors[0]} />
+              <Bar dataKey={dataKey} name="Valor" fill={chartColors[0]} />
             )}
           </ReChartsBar>
         </ResponsiveContainer>

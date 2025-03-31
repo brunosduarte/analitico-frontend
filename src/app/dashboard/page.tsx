@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useDashboardData } from '@/hooks/use-dashboard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -16,7 +16,8 @@ import {
 import { SummaryCards } from '@/components/dashboard/summary-cards'
 import { format } from 'date-fns'
 import { DashboardFiltros } from '@/types/api'
-import { MESES_ABREV, MESES_ORDEM } from '@/lib/constants'
+import { MESES_ABREV, MESES_ORDEM, CHART_THEMES } from '@/lib/constants'
+import { ChartThemeSelector } from '@/components/dashboard/chart-theme-selector'
 
 // Import chart components with dynamic imports to avoid hydration issues
 import dynamic from 'next/dynamic'
@@ -24,44 +25,62 @@ import dynamic from 'next/dynamic'
 // Dynamically import components that might cause hydration issues
 const SalaryBreakdown = dynamic(
   () =>
-    import('@/components/dashboard/charts').then((mod) => mod.SalaryBreakdown),
+    import('@/components/dashboard/charts/salary-breakdown').then(
+      (mod) => mod.SalaryBreakdown,
+    ),
   { ssr: false },
 )
 const ReturnsBreakdown = dynamic(
   () =>
-    import('@/components/dashboard/charts').then((mod) => mod.ReturnsBreakdown),
+    import('@/components/dashboard/charts/returns-breakdown').then(
+      (mod) => mod.ReturnsBreakdown,
+    ),
   { ssr: false },
 )
 const WeeklyDistribution = dynamic(
   () =>
-    import('@/components/dashboard/charts').then(
+    import('@/components/dashboard/charts/weekly-distribution').then(
       (mod) => mod.WeeklyDistribution,
     ),
   { ssr: false },
 )
 const MonthlyJobs = dynamic(
-  () => import('@/components/dashboard/charts').then((mod) => mod.MonthlyJobs),
+  () =>
+    import('@/components/dashboard/charts/monthly-jobs').then(
+      (mod) => mod.MonthlyJobs,
+    ),
   { ssr: false },
 )
 const ShiftDistribution = dynamic(
   () =>
-    import('@/components/dashboard/charts').then(
+    import('@/components/dashboard/charts/shift-distribution').then(
       (mod) => mod.ShiftDistribution,
     ),
   { ssr: false },
 )
 const JobValue = dynamic(
-  () => import('@/components/dashboard/charts').then((mod) => mod.JobValue),
+  () =>
+    import('@/components/dashboard/charts/job-value').then(
+      (mod) => mod.JobValue,
+    ),
   { ssr: false },
 )
 const TopJobs = dynamic(
-  () => import('@/components/dashboard/charts').then((mod) => mod.TopJobs),
+  () =>
+    import('@/components/dashboard/charts/top-jobs').then((mod) => mod.TopJobs),
   { ssr: false },
 )
 const TrabalhoChart = dynamic(
   () =>
     import('@/components/charts/trabalho-chart').then(
       (mod) => mod.TrabalhoChart,
+    ),
+  { ssr: false },
+)
+const DailyIncome = dynamic(
+  () =>
+    import('@/components/dashboard/charts/daily-income').then(
+      (mod) => mod.DailyIncome,
     ),
   { ssr: false },
 )
@@ -80,6 +99,9 @@ const DashboardTomadorSection = dynamic(
   { ssr: false },
 )
 
+// Define chart theme type
+type ChartColorTheme = keyof typeof CHART_THEMES
+
 /**
  * Dashboard Page: Página principal do dashboard
  */
@@ -92,6 +114,10 @@ export default function DashboardPage() {
 
   // Estado para o carregamento inicial
   const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  // Estado para o tema de cores dos gráficos
+  const [chartColorTheme, setChartColorTheme] =
+    useState<ChartColorTheme>('classic')
 
   // Use useEffect para inicializar as datas após a montagem
   useEffect(() => {
@@ -109,13 +135,13 @@ export default function DashboardPage() {
   }, [])
 
   // Extrair mês abreviado em português
-  const getMesAbreviado = (date: Date): string => {
+  const getMesAbreviado = useCallback((date: Date): string => {
     // Converte para um número de 0-11
     const mesNum = date.getMonth()
     // Mapeia para JAN, FEV, etc. conforme constantes da aplicação
     const mesesKeys = Object.keys(MESES_ABREV)
     return mesesKeys[mesNum] || 'JAN'
-  }
+  }, [])
 
   // Preparar filtros para a API com base no período selecionado
   const filtros: DashboardFiltros = !dateRange
@@ -216,6 +242,11 @@ export default function DashboardPage() {
     setDateRange(range)
     // Force um refetch explícito quando o período mudar
     setTimeout(() => refetch(), 0)
+  }
+
+  // Função para atualizar o tema de cores dos gráficos
+  const handleChartThemeChange = (theme: ChartColorTheme) => {
+    setChartColorTheme(theme)
   }
 
   // Se o componente ainda não foi montado no cliente, mostrar um estado de carregamento inicial
@@ -334,6 +365,7 @@ export default function DashboardPage() {
               initialRange={dateRange}
             />
           )}
+          <ChartThemeSelector onThemeChange={handleChartThemeChange} />
         </div>
       </div>
 
@@ -351,45 +383,85 @@ export default function DashboardPage() {
         {/* Tab de Visão Geral */}
         <TabsContent value="geral" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <SalaryBreakdown data={salaryBreakdown} />
-            <ReturnsBreakdown data={returnsData} />
+            <SalaryBreakdown
+              data={salaryBreakdown}
+              isLoading={isLoading}
+              chartTheme={chartColorTheme}
+            />
+            <ReturnsBreakdown
+              data={returnsData}
+              isLoading={isLoading}
+              chartTheme={chartColorTheme}
+            />
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            <MonthlyJobs data={monthlyJobsData} />
-            <WeeklyDistribution data={weeklyDistribution} />
-          </div>
-
-          {/* Componente de gráfico de trabalhos movido do detalhe de extrato */}
-          <TrabalhoChart
+          {/* Rendimentos por dia */}
+          <DailyIncome
             trabalhos={trabalhos}
-            title="Distribuição de Trabalhos"
-            description="Visão consolidada de todos os trabalhos no período"
+            isLoading={isLoading}
+            chartTheme={chartColorTheme}
           />
 
           <div className="grid grid-cols-1 gap-4">
-            <ShiftDistribution trabalhos={trabalhos} />
+            <MonthlyJobs
+              data={monthlyJobsData}
+              isLoading={isLoading}
+              chartTheme={chartColorTheme}
+            />
+            <WeeklyDistribution
+              data={weeklyDistribution}
+              isLoading={isLoading}
+              chartTheme={chartColorTheme}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <ShiftDistribution
+              trabalhos={trabalhos}
+              isLoading={isLoading}
+              chartTheme={chartColorTheme}
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <JobValue trabalhos={trabalhos} />
-            <TopJobs trabalhos={trabalhos} />
+            <JobValue
+              trabalhos={trabalhos}
+              isLoading={isLoading}
+              chartTheme={chartColorTheme}
+            />
+            <TopJobs
+              trabalhos={trabalhos}
+              isLoading={isLoading}
+              chartTheme={chartColorTheme}
+            />
           </div>
         </TabsContent>
 
-        {/* Tab de Funções (Nova) */}
+        {/* Tab de Funções */}
         <TabsContent value="funcoes" className="space-y-4">
           <FunctionDistribution
             functionData={functionDistribution}
             trabalhos={trabalhos}
+            isLoading={isLoading}
+            chartTheme={chartColorTheme}
           />
         </TabsContent>
 
-        {/* Tab de Tomadores */}
+        {/* Tab de Tomadores - TrabalhoChart agora fica aqui */}
         <TabsContent value="tomadores" className="space-y-4">
           <DashboardTomadorSection
             tomadoresData={tomadoresData}
             trabalhos={trabalhos}
+            isLoading={isLoading}
+            chartTheme={chartColorTheme}
+          />
+
+          {/* Apenas o gráfico de distribuição por tomador fica nesta aba */}
+          <TrabalhoChart
+            trabalhos={trabalhos}
+            title="Distribuição de Trabalhos por Tomador"
+            description="Visão consolidada de todos os trabalhos por tomador no período"
+            chartTheme={chartColorTheme}
           />
         </TabsContent>
       </Tabs>

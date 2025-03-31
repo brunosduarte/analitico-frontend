@@ -90,65 +90,6 @@ export const CATEGORIAS_CORES: Record<string, string> = {
   CONFERENTE: 'gray',
 }
 
-// Cores para gráficos
-export const CHART_COLORS = [
-  // classic
-  '#4046CA',
-  '#0FB5AE',
-  '#F68512',
-  '#DE3D82',
-  '#7E84FA',
-  '#72E06A',
-  '#147AF4',
-  '#7327D3',
-  '#E8C600',
-  '#CB5E00',
-  '#008F5D',
-  '#BCE930',
-
-  // //wheel
-  // '#F3E339',
-  // '#FDC434',
-  // '#F18C2F',
-  // '#E8602B',
-  // '#E22028',
-  // '#C40B7B',
-  // '#6C3C88',
-  // '#445096',
-  // '#2B73AC',
-  // '#1197B9',
-  // '#0F8E5D',
-  // '#8EBA3A',
-
-  // //sepia
-  // '#7BBC9A',
-  // '#478DB8',
-  // '#E9BA5C',
-  // '#E46E53',
-  // '#9C71C6',
-  // '#6CBDDF',
-  // '#757595',
-  // '#B07C4F',
-  // '#A59F9C',
-  // '#B0D364',
-  // '#9D5373',
-  // '#DF7172',
-
-  // vivid
-  // '#2563eb', // blue-600
-  // '#10b981', // emerald-500
-  // '#8b5cf6', // violet-500
-  // '#f59e0b', // amber-500
-  // '#ef4444', // red-500
-  // '#06b6d4', // cyan-500
-  // '#ec4899', // pink-500
-  // '#6366f1', // indigo-500
-  // '#14b8a6', // teal-500
-  // '#84cc16', // lime-500
-  // '#0ea5e9', // sky-500
-  // '#f97316', // orange-500
-]
-
 // Limites para uploads
 export const UPLOAD_LIMITS = {
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
@@ -214,3 +155,66 @@ export const FERIADOS_NACIONAIS_MOVEIS: FeriadosAnuais = {
   '2026': ['17/02', '03/04', '05/04', '10/05', '04/06', '09/08'],
   '2027': ['09/02', '26/00', '28/03', '27/05', '09/05', '08/08'],
 }
+
+// Cores para gráficos
+export const CHART_THEMES = {
+  classic: [
+    '#4046CA',
+    '#0FB5AE',
+    '#F68512',
+    '#DE3D82',
+    '#7E84FA',
+    '#72E06A',
+    '#147AF4',
+    '#7327D3',
+    '#E8C600',
+    '#CB5E00',
+    '#008F5D',
+    '#BCE930',
+  ],
+  wheel: [
+    '#F3E339',
+    '#FDC434',
+    '#F18C2F',
+    '#E8602B',
+    '#E22028',
+    '#C40B7B',
+    '#6C3C88',
+    '#445096',
+    '#2B73AC',
+    '#1197B9',
+    '#0F8E5D',
+    '#8EBA3A',
+  ],
+  sepia: [
+    '#7BBC9A',
+    '#478DB8',
+    '#E9BA5C',
+    '#E46E53',
+    '#9C71C6',
+    '#6CBDDF',
+    '#757595',
+    '#B07C4F',
+    '#A59F9C',
+    '#B0D364',
+    '#9D5373',
+    '#DF7172',
+  ],
+  vivid: [
+    '#2563eb', // blue-600
+    '#10b981', // emerald-500
+    '#8b5cf6', // violet-500
+    '#f59e0b', // amber-500
+    '#ef4444', // red-500
+    '#06b6d4', // cyan-500
+    '#ec4899', // pink-500
+    '#6366f1', // indigo-500
+    '#14b8a6', // teal-500
+    '#84cc16', // lime-500
+    '#0ea5e9', // sky-500
+    '#f97316', // orange-500
+  ],
+}
+
+// Default color scheme for backwards compatibility
+export const CHART_COLORS = CHART_THEMES.classic

@@ -3,10 +3,12 @@
 import { useMemo } from 'react'
 import { PieChart } from '@/components/charts'
 import { ShiftTooltip } from '@/components/charts/utils/tooltips'
+import { CHART_THEMES } from '@/lib/constants'
 
 interface ShiftDistributionProps {
   trabalhos: any[] // Trabalhos com campos adicionados
   isLoading?: boolean
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
@@ -15,6 +17,7 @@ interface ShiftDistributionProps {
 export function ShiftDistribution({
   trabalhos,
   isLoading = false,
+  chartTheme = 'classic',
 }: ShiftDistributionProps) {
   // Processar dados para o gráfico de turnos
   const turnosData = useMemo(() => {
@@ -37,11 +40,14 @@ export function ShiftDistribution({
     const total = Object.values(turnos).reduce((sum, value) => sum + value, 0)
 
     // Converter para formato adequado para o gráfico
-    return Object.entries(turnos).map(([turno, quantidade]) => ({
+    const data = Object.entries(turnos).map(([turno, quantidade]) => ({
       name: turno,
       value: quantidade,
       total,
     }))
+
+    // Ordenar alfabeticamente para garantir que sempre apareça A, B, C, D
+    return data.sort((a, b) => a.name.localeCompare(b.name))
   }, [trabalhos])
 
   return (
@@ -54,6 +60,7 @@ export function ShiftDistribution({
       tooltipContent={<ShiftTooltip />}
       height={320}
       labelFormatter={(name, percent) => `${(percent * 100).toFixed(0)}%`}
+      colors={CHART_THEMES[chartTheme]}
     />
   )
 }

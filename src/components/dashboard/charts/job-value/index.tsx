@@ -3,11 +3,13 @@
 import { useMemo } from 'react'
 import { BarChart } from '@/components/charts'
 import { formatCurrency } from '@/lib/utils'
+import { CHART_THEMES } from '@/lib/constants'
 
 interface JobValueProps {
   trabalhos: any[] // Trabalhos com campos adicionados
   isLoading?: boolean
   limit?: number
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
@@ -17,6 +19,7 @@ export function JobValue({
   trabalhos,
   isLoading = false,
   limit = 15,
+  chartTheme = 'classic',
 }: JobValueProps) {
   // Calcular dados para o gráfico de valor por faina
   const workValueData = useMemo(() => {
@@ -89,6 +92,8 @@ export function JobValue({
         // Abreviar o nome para exibição no eixo X, mantendo a legenda completa
         return name.split(' ')[0] // Mostrar apenas o nome do navio
       }}
+      chartTheme={chartTheme}
+      colors={CHART_THEMES[chartTheme]}
     />
   )
 }

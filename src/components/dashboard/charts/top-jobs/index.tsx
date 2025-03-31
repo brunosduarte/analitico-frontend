@@ -3,12 +3,13 @@
 import { useMemo } from 'react'
 import { BarChart } from '@/components/charts'
 import { formatCurrency } from '@/lib/utils'
-import { CHART_COLORS } from '@/lib/constants'
+import { CHART_THEMES } from '@/lib/constants'
 
 interface TopJobsProps {
   trabalhos: any[] // Trabalhos com campos adicionados
   isLoading?: boolean
   limit?: number
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
@@ -18,6 +19,7 @@ export function TopJobs({
   trabalhos,
   isLoading = false,
   limit = 10,
+  chartTheme = 'classic',
 }: TopJobsProps) {
   // Calcular dados para o top de fainas
   const topJobsData = useMemo(() => {
@@ -88,7 +90,8 @@ export function TopJobs({
       layout="vertical"
       yAxisFormatter={(name) => name} // Mostrar a legenda completa no eixo Y
       xAxisFormatter={(value) => formatCurrency(value).split(',')[0]}
-      colors={[CHART_COLORS[3]]}
+      colors={CHART_THEMES[chartTheme]}
+      chartTheme={chartTheme}
     />
   )
 }

@@ -5,12 +5,13 @@ import { DataCard } from '@/components/common/data-card'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { useMemo } from 'react'
 import { BarChart, PieChart, ComposableChart } from '@/components/charts'
-import { FUNCTION_NAMES } from '@/lib/constants'
+import { FUNCTION_NAMES, CHART_THEMES } from '@/lib/constants'
 
 interface FunctionDistributionProps {
   functionData: FunctionDistributionItem[]
   trabalhos: any[] // Trabalhos com campos adicionados
   isLoading?: boolean
+  chartTheme?: keyof typeof CHART_THEMES
 }
 
 /**
@@ -20,6 +21,7 @@ export function FunctionDistribution({
   functionData,
   trabalhos,
   isLoading = false,
+  chartTheme = 'classic',
 }: FunctionDistributionProps) {
   // Preparar dados para os gráficos
   const pieChartData = useMemo(() => {
@@ -229,6 +231,7 @@ export function FunctionDistribution({
                 tooltipContent={<FunctionPieTooltip />}
                 showLabels={true}
                 height={300}
+                colors={CHART_THEMES[chartTheme]}
               />
             </div>
           </div>
@@ -243,6 +246,7 @@ export function FunctionDistribution({
                 layout="horizontal"
                 yAxisFormatter={(value) => formatCurrency(value).split(',')[0]}
                 height={300}
+                colors={CHART_THEMES[chartTheme]}
               />
             </div>
           </div>
@@ -267,6 +271,7 @@ export function FunctionDistribution({
             }}
             tooltipContent={<ComparisonTooltip />}
             height={300}
+            colors={CHART_THEMES[chartTheme]}
           />
         </div>
       </DataCard>
