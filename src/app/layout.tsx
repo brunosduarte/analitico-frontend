@@ -43,7 +43,7 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${inter.variable} ${robotoMono.variable}`}
-      // suppressHydrationWarning
+      suppressHydrationWarning
     >
       <body>
         <Providers>

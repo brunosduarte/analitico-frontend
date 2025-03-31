@@ -9,13 +9,13 @@ import Link from 'next/link'
 import { ChevronLeft, Download, Printer, FileText } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useParams } from 'next/navigation'
 
-export default function ExtratoDetailPage({
-  params,
-}: {
-  params: { id: string }
-}) {
-  const { id } = params
+export default function ExtratoDetailPage() {
+  // Use the useParams hook instead
+  const params = useParams()
+  const id = params.id as string
+
   const { data: extrato, isLoading, error } = useExtrato(id)
 
   const handlePrint = () => {

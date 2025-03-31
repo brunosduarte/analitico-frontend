@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ExtratoFiltros } from '@/lib/api'
+import { ExtratoFiltros } from '@/types/api'
 import {
   Card,
   CardContent,
@@ -40,13 +40,21 @@ export default function ExtratosPage() {
 
     if (valor.match(/^\d{3}-\d+$/)) {
       // Parece ser uma matrícula
-      setFiltros((prev) => ({ ...prev, matricula: valor, nome: undefined }))
+      setFiltros((prev: ExtratoFiltros) => ({
+        ...prev,
+        matricula: valor,
+        nome: undefined,
+      }))
     } else if (valor.length > 0) {
       // Provavelmente um nome
-      setFiltros((prev) => ({ ...prev, nome: valor, matricula: undefined }))
+      setFiltros((prev: ExtratoFiltros) => ({
+        ...prev,
+        nome: valor,
+        matricula: undefined,
+      }))
     } else {
       // Busca vazia, remover filtros de nome e matrícula
-      setFiltros((prev) => {
+      setFiltros((prev: ExtratoFiltros) => {
         const { ...rest } = prev
         return rest
       })
@@ -57,14 +65,14 @@ export default function ExtratosPage() {
   const handleSelectChange = (field: keyof ExtratoFiltros, value: string) => {
     if (value === 'all') {
       // Se o valor for "all", remover este filtro
-      setFiltros((prev) => {
+      setFiltros((prev: ExtratoFiltros) => {
         const newFiltros = { ...prev }
         delete newFiltros[field]
         return newFiltros
       })
     } else {
       // Definir o novo valor do filtro
-      setFiltros((prev) => ({ ...prev, [field]: value }))
+      setFiltros((prev: ExtratoFiltros) => ({ ...prev, [field]: value }))
     }
   }
 
