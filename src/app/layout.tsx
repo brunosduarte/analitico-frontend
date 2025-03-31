@@ -1,19 +1,21 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter, Roboto_Mono as RobotoMono } from 'next/font/google'
 import './globals.css'
 
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Providers } from '@/providers'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const inter = Inter({
   subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const robotoMono = RobotoMono({
   subsets: ['latin'],
+  variable: '--font-roboto-mono',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -27,7 +29,6 @@ export const metadata: Metadata = {
   authors: [{ name: 'PnT' }],
 }
 
-// Configuração de viewport separada (nova API do Next.js 14)
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -39,14 +40,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      {/* suppressHydrationWarning */}
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {/* className="min-h-screen bg-background font-sans antialiased" */}
+    <html
+      lang="pt-BR"
+      className={`${inter.variable} ${robotoMono.variable}`}
+      // suppressHydrationWarning
+    >
+      <body>
         <Providers>
-          <div className="flex min-h-screen flex-col bg-background">
+          <div className="flex min-h-screen flex-col bg-background antialiased">
             <Header />
             <main className="flex-1 container py-6">{children}</main>
             <Footer />
@@ -54,12 +55,5 @@ export default function RootLayout({
         </Providers>
       </body>
     </html>
-    // <html lang="en">
-    //   <body
-    //     className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-    //   >
-    //     {children}
-    //   </body>
-    // </html>
   )
 }

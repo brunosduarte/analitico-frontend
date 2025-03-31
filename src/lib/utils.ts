@@ -167,7 +167,7 @@ export function validatePdfFile(file: File): {
 /**
  * Função para debounce de função
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
   delay: number,
 ): (...args: Parameters<T>) => void {

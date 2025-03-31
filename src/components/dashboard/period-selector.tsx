@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -6,7 +8,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { CalendarIcon } from 'lucide-react'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   format,
   startOfMonth,
@@ -45,28 +47,38 @@ interface PeriodSelectorProps {
 export function PeriodSelector({
   onChange,
   initialRange,
-  // className,
 }: PeriodSelectorProps) {
   // Estado para o período selecionado
-  const [dateRange, setDateRange] = useState<DateRange>(
-    initialRange || {
-      from: startOfMonth(new Date()),
-      to: endOfMonth(new Date()),
-    },
-  )
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: new Date(2000, 0, 1), // Placeholder date that will be replaced
+    to: new Date(2000, 0, 1), // Placeholder date that will be replaced
+  })
 
   // Estado para controlar o popover
   const [open, setOpen] = useState(false)
+  // Estado para rastrear se o componente foi montado
+  const [mounted, setMounted] = useState(false)
 
-  // Selected period display string
+  // Use useEffect para definir a data inicial após a montagem para evitar erros de hidratação
+  useEffect(() => {
+    setMounted(true)
+    setDateRange(
+      initialRange || {
+        from: startOfMonth(new Date()),
+        to: endOfMonth(new Date()),
+      },
+    )
+  }, [initialRange])
+
+  // Selected period display string - only render on client
   const selectedPeriodText =
-    isValid(dateRange.from) && isValid(dateRange.to)
+    mounted && isValid(dateRange.from) && isValid(dateRange.to)
       ? `${format(dateRange.from, 'dd/MM/yy')} - ${format(dateRange.to, 'dd/MM/yy')}`
-      : 'Selecione um período'
+      : 'Carregando...'
 
-  // Calcula o número de dias no período
+  // Calcula o número de dias no período - only render on client
   const daysDifference =
-    isValid(dateRange.from) && isValid(dateRange.to)
+    mounted && isValid(dateRange.from) && isValid(dateRange.to)
       ? Math.round(
           (dateRange.to.getTime() - dateRange.from.getTime()) /
             (1000 * 60 * 60 * 24),
@@ -211,9 +223,11 @@ export function PeriodSelector({
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {selectedPeriodText}
-          <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium">
-            {daysDifference} dias
-          </span>
+          {mounted && (
+            <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium">
+              {daysDifference} dias
+            </span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="end">

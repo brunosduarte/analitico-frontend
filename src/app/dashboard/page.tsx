@@ -41,14 +41,29 @@ import { DashboardTomadorSection } from '@/components/dashboard/tomador/tomador-
  * Dashboard Page: Página principal do dashboard
  */
 export default function DashboardPage() {
+  // Estado para controlar o lado do cliente
+  const [isMounted, setIsMounted] = useState(false)
+
   // Estado para o período selecionado
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // Primeiro dia do mês atual
-    to: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0), // Último dia do mês atual
-  })
+  const [dateRange, setDateRange] = useState<DateRange | null>(null)
 
   // Estado para o carregamento inicial
   const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  // Use useEffect para inicializar as datas após a montagem
+  useEffect(() => {
+    // Marcar o componente como montado
+    setIsMounted(true)
+
+    // Definir o intervalo inicial - primeiro dia do mês atual até o último dia do mês
+    const today = new Date()
+    const initialRange = {
+      from: new Date(today.getFullYear(), today.getMonth(), 1),
+      to: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+    }
+
+    setDateRange(initialRange)
+  }, [])
 
   // Extrair mês abreviado em português
   const getMesAbreviado = (date: Date): string => {
@@ -60,14 +75,18 @@ export default function DashboardPage() {
   }
 
   // Preparar filtros para a API com base no período selecionado
-  const filtros: DashboardFiltros = {
-    mes: dateRange.from ? getMesAbreviado(dateRange.from) : undefined,
-    ano: dateRange.from ? dateRange.from.getFullYear().toString() : undefined,
-    dataInicio: dateRange.from
-      ? format(dateRange.from, 'yyyy-MM-dd')
-      : undefined,
-    dataFim: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
-  }
+  const filtros: DashboardFiltros = !dateRange
+    ? {}
+    : {
+        mes: dateRange.from ? getMesAbreviado(dateRange.from) : undefined,
+        ano: dateRange.from
+          ? dateRange.from.getFullYear().toString()
+          : undefined,
+        dataInicio: dateRange.from
+          ? format(dateRange.from, 'yyyy-MM-dd')
+          : undefined,
+        dataFim: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
+      }
 
   // Hook para obter dados do dashboard com base no período selecionado
   const {
@@ -84,22 +103,22 @@ export default function DashboardPage() {
     extratos,
     refetch,
     allExtratos, // Todos os extratos disponíveis sem filtro de período
-  } = useDashboardData(filtros)
+  } = useDashboardData(isMounted && dateRange ? filtros : undefined)
 
   // Efeito para marcar quando o carregamento inicial termina
   useEffect(() => {
-    if (!isLoading && isInitialLoad) {
+    if (!isLoading && isInitialLoad && isMounted) {
       setIsInitialLoad(false)
     }
-  }, [isLoading, isInitialLoad])
+  }, [isLoading, isInitialLoad, isMounted])
 
   // Efeito para carregar dados no primeiro render
   useEffect(() => {
-    // Tenta refetch explícito no primeiro carregamento
-    if (isInitialLoad) {
+    // Tenta refetch explícito quando o componente é montado e temos um dateRange
+    if (isInitialLoad && isMounted && dateRange) {
       refetch()
     }
-  }, [isInitialLoad, refetch])
+  }, [isInitialLoad, refetch, isMounted, dateRange])
 
   // Efeito para verificar se há dados no período atual e ajustar conforme necessário
   useEffect(() => {
@@ -108,7 +127,8 @@ export default function DashboardPage() {
       !isLoading &&
       !isInitialLoad &&
       extratos.length === 0 &&
-      allExtratos?.length > 0
+      allExtratos?.length > 0 &&
+      isMounted
     ) {
       console.log(
         'Sem dados no período atual, mas existem extratos em outros períodos',
@@ -145,7 +165,7 @@ export default function DashboardPage() {
         handlePeriodChange(newRange)
       }
     }
-  }, [isLoading, isInitialLoad, extratos, allExtratos])
+  }, [isLoading, isInitialLoad, extratos, allExtratos, isMounted])
 
   // Função para atualizar o período selecionado
   const handlePeriodChange = (range: DateRange) => {
@@ -153,6 +173,11 @@ export default function DashboardPage() {
     setDateRange(range)
     // Force um refetch explícito quando o período mudar
     setTimeout(() => refetch(), 0)
+  }
+
+  // Se o componente ainda não foi montado no cliente, mostrar um estado de carregamento inicial
+  if (!isMounted) {
+    return <LoadingState message="Inicializando dashboard..." />
   }
 
   // Se estiver carregando inicialmente, mostrar estado de carregamento
@@ -260,10 +285,12 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex flex-col gap-2 w-full md:w-auto">
-          <PeriodSelector
-            onChange={handlePeriodChange}
-            initialRange={dateRange}
-          />
+          {dateRange && (
+            <PeriodSelector
+              onChange={handlePeriodChange}
+              initialRange={dateRange}
+            />
+          )}
         </div>
       </div>
 

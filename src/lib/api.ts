@@ -79,16 +79,24 @@ export const getExtratoById = async (id: string): Promise<Extrato> => {
   }
 }
 
+// Tipos para os trabalhos por tomador
+export interface TrabalhoTomador {
+  dia: string
+  folha: string
+  baseDeCalculo: number
+  liquido: number
+  [key: string]: string | number | undefined
+}
+
 /**
  * Buscar trabalhos por tomador
  */
 export const getTrabalhosPorTomador = async (
   tomador: string,
-): Promise<any[]> => {
+): Promise<TrabalhoTomador[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<any[]>> = await apiClient.get(
-      `/trabalhos/tomador/${tomador}`,
-    )
+    const response: AxiosResponse<ApiResponse<TrabalhoTomador[]>> =
+      await apiClient.get(`/trabalhos/tomador/${tomador}`)
     return response.data.data
   } catch (error) {
     console.error(`Erro ao buscar trabalhos do tomador ${tomador}:`, error)
@@ -113,22 +121,27 @@ export const getResumoMensal = async (
   }
 }
 
+// Tipo para resposta do upload de extrato
+export interface UploadExtratoResponse {
+  id: string
+  status: 'success' | 'error' | 'processing'
+  message?: string
+  [key: string]: string | undefined
+}
+
 /**
  * Upload de extrato PDF
  */
 export const uploadExtratoPDF = async (
   formData: FormData,
-): Promise<ApiResponse<any>> => {
+): Promise<ApiResponse<UploadExtratoResponse>> => {
   try {
-    const response: AxiosResponse<ApiResponse<any>> = await apiClient.post(
-      '/analitico',
-      formData,
-      {
+    const response: AxiosResponse<ApiResponse<UploadExtratoResponse>> =
+      await apiClient.post('/analitico', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      },
-    )
+      })
     return response.data
   } catch (error) {
     console.error('Erro ao fazer upload do extrato:', error)
@@ -158,19 +171,25 @@ export const getAnaliseTomadores = async (
   }
 }
 
+// Tipo para os dados de salary breakdown
+export interface SalaryBreakdownItem {
+  name: string
+  value: number
+  total?: number
+  [key: string]: string | number | undefined
+}
+
 /**
  * Função para obter os dados de salário bruto (distribuição)
  */
 export const getSalaryBreakdown = async (
   filtros?: DashboardFiltros,
-): Promise<any> => {
+): Promise<SalaryBreakdownItem[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<any>> = await apiClient.get(
-      '/analise/salario-breakdown',
-      {
+    const response: AxiosResponse<ApiResponse<SalaryBreakdownItem[]>> =
+      await apiClient.get('/analise/salario-breakdown', {
         params: filtros,
-      },
-    )
+      })
     return response.data.data
   } catch (error) {
     console.error('Erro ao buscar dados de distribuição salarial:', error)
@@ -178,19 +197,25 @@ export const getSalaryBreakdown = async (
   }
 }
 
+// Tipo para distribuição de turnos
+export interface ShiftDistributionItem {
+  name: string
+  value: number
+  total?: number
+  [key: string]: string | number | undefined
+}
+
 /**
  * Função para obter distribuição de turnos
  */
 export const getShiftDistribution = async (
   filtros?: DashboardFiltros,
-): Promise<any> => {
+): Promise<ShiftDistributionItem[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<any>> = await apiClient.get(
-      '/analise/turnos',
-      {
+    const response: AxiosResponse<ApiResponse<ShiftDistributionItem[]>> =
+      await apiClient.get('/analise/turnos', {
         params: filtros,
-      },
-    )
+      })
     return response.data.data
   } catch (error) {
     console.error('Erro ao buscar distribuição de turnos:', error)
@@ -198,24 +223,35 @@ export const getShiftDistribution = async (
   }
 }
 
+// Tipo para distribuição semanal
+export interface WeeklyWorkItem {
+  week: string
+  [key: string]: string | number
+}
+
 /**
  * Função para obter distribuição semanal de trabalhos
  */
 export const getWeeklyWorkDistribution = async (
   filtros?: DashboardFiltros,
-): Promise<any> => {
+): Promise<WeeklyWorkItem[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<any>> = await apiClient.get(
-      '/analise/trabalhos-semanais',
-      {
+    const response: AxiosResponse<ApiResponse<WeeklyWorkItem[]>> =
+      await apiClient.get('/analise/trabalhos-semanais', {
         params: filtros,
-      },
-    )
+      })
     return response.data.data
   } catch (error) {
     console.error('Erro ao buscar distribuição semanal de trabalhos:', error)
     throw error
   }
+}
+
+// Tipo para top jobs
+export interface TopJobItem {
+  name: string
+  value: number
+  [key: string]: string | number | undefined
 }
 
 /**
@@ -224,14 +260,12 @@ export const getWeeklyWorkDistribution = async (
 export const getTopJobs = async (
   filtros?: DashboardFiltros,
   limit: number = 10,
-): Promise<any> => {
+): Promise<TopJobItem[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<any>> = await apiClient.get(
-      '/analise/top-trabalhos',
-      {
+    const response: AxiosResponse<ApiResponse<TopJobItem[]>> =
+      await apiClient.get('/analise/top-trabalhos', {
         params: { ...filtros, limit },
-      },
-    )
+      })
     return response.data.data
   } catch (error) {
     console.error('Erro ao buscar top trabalhos:', error)
@@ -239,19 +273,24 @@ export const getTopJobs = async (
   }
 }
 
+// Tipo para dados de retornos
+export interface ReturnsDataItem {
+  name: string
+  value: number
+  [key: string]: string | number | undefined
+}
+
 /**
  * Função para obter dados de retornos (férias, 13º, FGTS)
  */
 export const getReturnsData = async (
   filtros?: DashboardFiltros,
-): Promise<any> => {
+): Promise<ReturnsDataItem[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<any>> = await apiClient.get(
-      '/analise/retornos',
-      {
+    const response: AxiosResponse<ApiResponse<ReturnsDataItem[]>> =
+      await apiClient.get('/analise/retornos', {
         params: filtros,
-      },
-    )
+      })
     return response.data.data
   } catch (error) {
     console.error('Erro ao buscar dados de retornos:', error)
@@ -259,19 +298,27 @@ export const getReturnsData = async (
   }
 }
 
+// Tipo para resumo do dashboard
+export interface DashboardSummaryData {
+  totalFainas: number
+  mediaFainasSemana: number
+  diasTrabalhados: number
+  mediaBrutoFaina: number
+  mediaLiquidoFaina: number
+  [key: string]: string | number | undefined
+}
+
 /**
  * Função para obter resumo completo do dashboard
  */
 export const getDashboardSummary = async (
   filtros?: DashboardFiltros,
-): Promise<any> => {
+): Promise<DashboardSummaryData> => {
   try {
-    const response: AxiosResponse<ApiResponse<any>> = await apiClient.get(
-      '/analise/dashboard-resumo',
-      {
+    const response: AxiosResponse<ApiResponse<DashboardSummaryData>> =
+      await apiClient.get('/analise/dashboard-resumo', {
         params: filtros,
-      },
-    )
+      })
     return response.data.data
   } catch (error) {
     console.error('Erro ao buscar resumo do dashboard:', error)
@@ -320,19 +367,26 @@ const processAnaliseTomadoresFallback = async (
   return Object.values(tomadores).sort((a, b) => b.valorTotal - a.valorTotal)
 }
 
+// Tipo para distribuição por função
+export interface FunctionDistributionItem {
+  name: string
+  code: string
+  value: number
+  totalValue: number
+  [key: string]: string | number | undefined
+}
+
 /**
  * Função para obter distribuição por função
  */
 export const getFunctionDistribution = async (
   filtros?: DashboardFiltros,
-): Promise<any> => {
+): Promise<FunctionDistributionItem[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<any>> = await apiClient.get(
-      '/analise/funcoes',
-      {
+    const response: AxiosResponse<ApiResponse<FunctionDistributionItem[]>> =
+      await apiClient.get('/analise/funcoes', {
         params: filtros,
-      },
-    )
+      })
     return response.data.data
   } catch (error) {
     console.error('Erro ao buscar distribuição por função:', error)

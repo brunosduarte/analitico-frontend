@@ -336,14 +336,14 @@ export default function UploadPage() {
                 <ol className="list-decimal pl-6 space-y-2">
                   <li>
                     Selecione os arquivos arrastando para a área de upload ou
-                    clicando em "Selecionar Arquivos"
+                    clicando em &quot;Selecionar Arquivos&quot;
                   </li>
                   <li>
                     Verifique se todos os arquivos estão corretamente listados
                   </li>
                   <li>
-                    Clique em "Processar Arquivos" para iniciar o upload e
-                    processamento
+                    Clique em &quot;Processar Arquivos&quot; para iniciar o
+                    upload e processamento
                   </li>
                   <li>Aguarde até que todos os arquivos sejam processados</li>
                   <li>
