@@ -49,10 +49,7 @@ export function PeriodSelector({
   initialRange,
 }: PeriodSelectorProps) {
   // Estado para o período selecionado
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: new Date(2000, 0, 1), // Placeholder date that will be replaced
-    to: new Date(2000, 0, 1), // Placeholder date that will be replaced
-  })
+  const [dateRange, setDateRange] = useState<DateRange | null>(null)
 
   // Estado para controlar o popover
   const [open, setOpen] = useState(false)
@@ -62,6 +59,8 @@ export function PeriodSelector({
   // Use useEffect para definir a data inicial após a montagem para evitar erros de hidratação
   useEffect(() => {
     setMounted(true)
+
+    // Only set the date range after component has mounted to avoid hydration errors
     setDateRange(
       initialRange || {
         from: startOfMonth(new Date()),
@@ -72,13 +71,13 @@ export function PeriodSelector({
 
   // Selected period display string - only render on client
   const selectedPeriodText =
-    mounted && isValid(dateRange.from) && isValid(dateRange.to)
+    mounted && dateRange && isValid(dateRange.from) && isValid(dateRange.to)
       ? `${format(dateRange.from, 'dd/MM/yy')} - ${format(dateRange.to, 'dd/MM/yy')}`
-      : 'Carregando...'
+      : 'Selecionar período'
 
   // Calcula o número de dias no período - only render on client
   const daysDifference =
-    mounted && isValid(dateRange.from) && isValid(dateRange.to)
+    mounted && dateRange && isValid(dateRange.from) && isValid(dateRange.to)
       ? Math.round(
           (dateRange.to.getTime() - dateRange.from.getTime()) /
             (1000 * 60 * 60 * 24),
@@ -214,6 +213,19 @@ export function PeriodSelector({
     setOpen(false)
   }
 
+  // Don't render date-related content until component is mounted on client
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        className="w-full justify-start text-left font-normal md:w-[300px]"
+      >
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        Carregando...
+      </Button>
+    )
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -223,7 +235,7 @@ export function PeriodSelector({
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {selectedPeriodText}
-          {mounted && (
+          {daysDifference > 0 && (
             <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium">
               {daysDifference} dias
             </span>
@@ -245,17 +257,19 @@ export function PeriodSelector({
             ))}
           </div>
         </div>
-        <Calendar
-          mode="range"
-          selected={dateRange}
-          onSelect={handleSelect}
-          numberOfMonths={2}
-          locale={ptBR}
-          disabled={(date) =>
-            date > new Date() || date < new Date('2000-01-01')
-          }
-          initialFocus
-        />
+        {dateRange && (
+          <Calendar
+            mode="range"
+            selected={dateRange}
+            onSelect={handleSelect}
+            numberOfMonths={2}
+            locale={ptBR}
+            disabled={(date) =>
+              date > new Date() || date < new Date('2025-01-01')
+            }
+            initialFocus
+          />
+        )}
       </PopoverContent>
     </Popover>
   )

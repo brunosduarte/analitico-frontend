@@ -18,24 +18,67 @@ import { format } from 'date-fns'
 import { DashboardFiltros } from '@/types/api'
 import { MESES_ABREV, MESES_ORDEM } from '@/lib/constants'
 
-// Componentes de Gráficos
-import {
-  SalaryBreakdown,
-  ReturnsBreakdown,
-  WeeklyDistribution,
-  MonthlyJobs,
-  ShiftDistribution,
-  JobValue,
-  TopJobs,
-} from '@/components/dashboard/charts'
+// Import chart components with dynamic imports to avoid hydration issues
+import dynamic from 'next/dynamic'
 
-// Componente para aba de funções (novo)
-import { FunctionDistribution } from '@/components/dashboard/function/function-distribution'
-
-// Importar o componente reutilizado do detalhe de extrato
-import { TrabalhoChart } from '@/components/charts/trabalho-chart'
-
-import { DashboardTomadorSection } from '@/components/dashboard/tomador/tomador-section'
+// Dynamically import components that might cause hydration issues
+const SalaryBreakdown = dynamic(
+  () =>
+    import('@/components/dashboard/charts').then((mod) => mod.SalaryBreakdown),
+  { ssr: false },
+)
+const ReturnsBreakdown = dynamic(
+  () =>
+    import('@/components/dashboard/charts').then((mod) => mod.ReturnsBreakdown),
+  { ssr: false },
+)
+const WeeklyDistribution = dynamic(
+  () =>
+    import('@/components/dashboard/charts').then(
+      (mod) => mod.WeeklyDistribution,
+    ),
+  { ssr: false },
+)
+const MonthlyJobs = dynamic(
+  () => import('@/components/dashboard/charts').then((mod) => mod.MonthlyJobs),
+  { ssr: false },
+)
+const ShiftDistribution = dynamic(
+  () =>
+    import('@/components/dashboard/charts').then(
+      (mod) => mod.ShiftDistribution,
+    ),
+  { ssr: false },
+)
+const JobValue = dynamic(
+  () => import('@/components/dashboard/charts').then((mod) => mod.JobValue),
+  { ssr: false },
+)
+const TopJobs = dynamic(
+  () => import('@/components/dashboard/charts').then((mod) => mod.TopJobs),
+  { ssr: false },
+)
+const TrabalhoChart = dynamic(
+  () =>
+    import('@/components/charts/trabalho-chart').then(
+      (mod) => mod.TrabalhoChart,
+    ),
+  { ssr: false },
+)
+const FunctionDistribution = dynamic(
+  () =>
+    import('@/components/dashboard/function/function-distribution').then(
+      (mod) => mod.FunctionDistribution,
+    ),
+  { ssr: false },
+)
+const DashboardTomadorSection = dynamic(
+  () =>
+    import('@/components/dashboard/tomador/tomador-section').then(
+      (mod) => mod.DashboardTomadorSection,
+    ),
+  { ssr: false },
+)
 
 /**
  * Dashboard Page: Página principal do dashboard
@@ -126,7 +169,7 @@ export default function DashboardPage() {
     if (
       !isLoading &&
       !isInitialLoad &&
-      extratos.length === 0 &&
+      extratos?.length === 0 &&
       allExtratos?.length > 0 &&
       isMounted
     ) {
@@ -217,7 +260,7 @@ export default function DashboardPage() {
             onClick: () => {
               // Buscar todos os dados sem filtro de período
               const range = {
-                from: new Date(2000, 0, 1), // 1 de Janeiro de 2000
+                from: new Date(2025, 0, 1), // 1 de Janeiro de 2025
                 to: new Date(), // Hoje
               }
               handlePeriodChange(range)
