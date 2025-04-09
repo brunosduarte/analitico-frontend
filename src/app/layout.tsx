@@ -47,7 +47,7 @@ export default function RootLayout({
     >
       <body>
         <Providers>
-          <div className="flex min-h-screen flex-col bg-background antialiased">
+          <div className="flex min-h-screen flex-col bg-background antialiased vsc-initialized">
             <Header />
             <main className="flex-1 container py-6">{children}</main>
             <Footer />
